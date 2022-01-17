@@ -2,6 +2,8 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module
 import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js'
 import { LightShadow } from 'https://cdn.skypack.dev/three@0.132.2/src/lights/LightShadow.js';
 import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
+
+import { setupModel } from './setModel.js';
 // import { Vector3 } from 'three';
 
 let camera, scene, renderer, controls;
@@ -23,10 +25,11 @@ let FP = false;
 let car;
 let redCar;
 let count = 0;
+let load = true;
 
 const scoreElement = document.getElementById("levell")
 
-init();
+await init();
 // await loadGLTF();
 animate();
 
@@ -40,29 +43,27 @@ function setThridPerson() {
     camera.position.set(0, 400, 1000);
 }
 
+
+
 async function loadGLTF(){
     const loader = new GLTFLoader();
 
-    loader.load('./assets/car.glb', (gltf) => {
-        car = gltf.scene;
-        car.scale.set(50, 50, 50)
-        // scene.add(car);
-        // car.position.x = 30;
-        // car.position.y = 20;
-        // car.position.z = 600;
-        
-        // redCar = new THREE.Mesh(car, '');
-        // scene.add(redCar);
-        // redCar.position.x = 30;
-        // redCar.position.y = 20;
-        // redCar.position.z = 600;
-        // console.log(redCar)
-    })
+    const carData = await loader.loadAsync('./assets/car.glb')
 
-    console.log('threr is a redCar', redCar);
+    console.log(carData)
+
+    const car = setupModel(carData);
+
+    console.log(car)
+
+    car.scale.set(40, 50, 20)
+    // car.position.set(30, 20, 600)
+    // console.log(car.size)
+    load = false;
+    return car
 }
-function init() {
-
+async function init() {
+    // load = true;
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     setThridPerson();
     camera.lookAt(0, 0, 0);
@@ -87,15 +88,19 @@ function init() {
     // box = loadGLTF();
     
     addPlane(scene);
-    box = addBox();
+    // box = addBox();
     // loadGLTF();
-    // console.log(car)
-    // box = car;
-    // console.log(box)
+    // console.log(carr)
+    // carr.scale(10, 10, 10)
+    // scene.add(carr)
+    box = await loadGLTF();
+    console.log(box)
+    console.log('add')
     box.position.y = 30;
     box.position.x = 20;
     box.position.z = 600;
     scene.add(box);
+
     console.log('speed = ', speed)
     for (i = 0; i < 4 * speed; i++){
         const obstacal = addObstacal(300);
@@ -120,9 +125,13 @@ function init() {
                 jump = true;
                 break;
             case 'KeyV':
-                FP = !FP;
+                FP = true;
+                break;
+            case 'KeyB':
+                FP = false;
                 break;
         }
+        console.log('eiei')
     }
 
     const onKeyUp = function (event) {
@@ -136,7 +145,6 @@ function init() {
         }
     }
 
-    console.log(obs)
 
     document.addEventListener( 'keydown', onKeyDown );
     document.addEventListener( 'keyup', onKeyUp);
@@ -167,8 +175,12 @@ function addObstacal(height){
 }
 
 function addPlane(scene){
+    const textureLoader = new THREE.TextureLoader();
+    const roadTexture = textureLoader.load('./assets/road.jpg')
     var planeGeometry1 = new THREE.PlaneGeometry( 500, innerHeight, 10, 10);
-    var plane1 = new THREE.Mesh( planeGeometry1, new THREE.MeshPhongMaterial( ));
+    var plane1 = new THREE.Mesh( planeGeometry1, new THREE.MeshPhongMaterial({
+        map: roadTexture
+    }));
     plane1.position.y = 0;
     plane1.rotation.x = -Math.PI / 2;
     plane1.castShadow = true;
@@ -234,18 +246,14 @@ function deleteObs(obstacals){
     }
 }
 
-function getObs(obstacals){
-    return obstacals;
-}
 function animate() {
 
     requestAnimationFrame( animate );
 
-    const oldObjectPosition = new THREE.Vector3();
-    box.getWorldPosition(oldObjectPosition)
+    // const oldObjectPosition = new THREE.Vector3();
+    // await box.getWorldPosition(oldObjectPosition)
     
     
-
     if (moveRight && canMove == true) {
         box.position.x += moveSpeed;
         if (Math.abs(box.position.x) >= (250) - 20) {
@@ -285,16 +293,14 @@ function animate() {
             obs.forEach(moveObs);
         }
         
-        
-        console.log(hit)
         if (obs[obs.length - 1].position.z > 1000){
             alert(`You Passed Level ${level}`)
-            start = false
+            start = !start;
             speed += 2;
             obs = [];
             level += 1;
             if (scoreElement) scoreElement.innerText = level;
-            if (level > 5) moveSpeed+=4;
+            if (level > 5) moveSpeed+=2;
             init()
         }
     }
@@ -304,7 +310,7 @@ function animate() {
     if (FP) {
         setFirstPerson();
     }
-    if(FP == false){
+    else if(FP == false){
         setThridPerson();
     }
 
