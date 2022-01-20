@@ -2,6 +2,7 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module
 import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js'
 import { LightShadow } from 'https://cdn.skypack.dev/three@0.132.2/src/lights/LightShadow.js';
 import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/FBXLoader.js';
 
 import { setupModel } from './setModel.js';
 // import { Vector3 } from 'three';
@@ -26,6 +27,9 @@ let car;
 let redCar;
 let count = 0;
 let load = true;
+let pause = false;
+let hitSound, bgSound, listener, audioLoader;
+// let listener;
 
 const scoreElement = document.getElementById("levell")
 
@@ -47,8 +51,8 @@ function setThridPerson() {
 
 async function loadGLTF(){
     const loader = new GLTFLoader();
-
-    const carData = await loader.loadAsync('./assets/car.glb')
+    const cars = ['./assets/car.glb', './assets/greenCar.glb', './assets/purpleCar.glb']
+    const carData = await loader.loadAsync(cars[Math.floor(Math.random()*3)])
 
     console.log(carData)
 
@@ -57,16 +61,61 @@ async function loadGLTF(){
     console.log(car)
 
     car.scale.set(40, 50, 20)
-    // car.position.set(30, 20, 600)
-    // console.log(car.size)
+
     load = false;
     return car
+}
+
+async function loadAnimatedModel(){
+    const loader = new FBXLoader();
+    const player = await loader.loadAsync('./assets/player.fbx')
+    player.scale.set(2, 2, 2)
+    player.position.set(30, 20, 600)
+    const anim = new FBXLoader();
+    const animation = await anim.loadAsync('./assets/running.fbx');
+
+    const mixer = new THREE.AnimationMixer(player);
+    console.log(mixer)
+    const idle = mixer.clipAction(animation.animations[0]);
+    idle.play();
+
+    scene.add(player);
+
+}
+async function loadBgSound(sound){
+    audioLoader = new THREE.AudioLoader();
+    audioLoader.load( './assets/bg.mp3', function( buffer ) {
+        sound.setBuffer( buffer );
+        sound.setLoop( true );
+        sound.setVolume( 0.5 );
+        sound.play();
+        // console.log('music')
+    });
+}
+async function loadHitSound(sound){
+    const audioLoader2 = new THREE.AudioLoader();
+    audioLoader2.load( './assets/hit.mp3', function( buffer ) {
+        sound.setBuffer( buffer );
+        // sound.setLoop( true );
+        sound.setVolume( 1 );
+        sound.play();
+        // console.log('music')
+    });
 }
 async function init() {
     // load = true;
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     setThridPerson();
     camera.lookAt(0, 0, 0);
+
+    listener = new THREE.AudioListener();
+    camera.add( listener );
+
+    bgSound = new THREE.Audio( listener );
+
+    loadBgSound(bgSound);
+    
+    
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color( 0xffffff );
@@ -88,12 +137,12 @@ async function init() {
     // box = loadGLTF();
     
     addPlane(scene);
-    // box = addBox();
+    box = addBox();
     // loadGLTF();
     // console.log(carr)
     // carr.scale(10, 10, 10)
     // scene.add(carr)
-    box = await loadGLTF();
+    // box = await loadGLTF();
     console.log(box)
     console.log('add')
     box.position.y = 30;
@@ -101,11 +150,14 @@ async function init() {
     box.position.z = 600;
     scene.add(box);
 
+    // loadAnimatedModel();
+
     console.log('speed = ', speed)
     for (i = 0; i < 4 * speed; i++){
-        const obstacal = addObstacal(300);
+        const obstacal = await loadGLTF();
         obstacal.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
         obstacal.position.z = i * -200;
+        obstacal.position.y = 20;
         obs.push(obstacal)
         scene.add(obstacal);   
     }
@@ -130,8 +182,10 @@ async function init() {
             case 'KeyB':
                 FP = false;
                 break;
+            case 'KeyP':
+                pause = true;
         }
-        console.log('eiei')
+        // console.log('eiei')
     }
 
     const onKeyUp = function (event) {
@@ -215,6 +269,7 @@ function collisionCheck(obstacal) {
     const box_z = box.position.z;
     const obs_x = obstacal.position.x;
     const obs_z = obstacal.position.z;
+    hitSound = new THREE.Audio( listener );
     // console.log(obs_z)
     if (box_z-20 < obs_z + 20 + speed && box_z-20 > obs_z + 20 - speed){
         // console.log(obs_z)
@@ -222,6 +277,7 @@ function collisionCheck(obstacal) {
         if(box_x-20 < obs_x + 70 + moveSpeed/2 && box_x+20 > obs_x - 70 - moveSpeed/2){
             // alert('You Lose');
             hit = true;
+            loadHitSound(hitSound)
             
         }
         // console.log('Z and X equal')
@@ -245,6 +301,13 @@ function deleteObs(obstacals){
         obs.shift()
     }
 }
+
+// function carSound(obstacals){
+//     if (obstacals.position.z == 100){
+//         console.log('run sound')
+//         loadSound(sound)
+//     }
+// }
 
 function animate() {
 
@@ -276,7 +339,12 @@ function animate() {
             //     // console.log(obs.length)
             //     collisionCheck(box, obs[i]);
             // }
+        if (pause){
+            start = false;
+            pause = false;
+        }
         obs.forEach(collisionCheck)
+        // obs.forEach(carSound)
         if (obs.length != 1){
 
             obs.forEach(deleteObs)
@@ -292,6 +360,8 @@ function animate() {
         else{
             obs.forEach(moveObs);
         }
+
+        
         
         if (obs[obs.length - 1].position.z > 1000){
             alert(`You Passed Level ${level}`)
@@ -301,6 +371,7 @@ function animate() {
             level += 1;
             if (scoreElement) scoreElement.innerText = level;
             if (level > 5) moveSpeed+=2;
+            sound.stop()
             init()
         }
     }
