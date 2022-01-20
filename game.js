@@ -28,7 +28,7 @@ let redCar;
 let count = 0;
 let load = true;
 let pause = false;
-let hitSound, bgSound, listener, audioLoader;
+let hitSound, listener, audioLoader;
 // let listener;
 
 const scoreElement = document.getElementById("levell")
@@ -99,7 +99,7 @@ async function loadHitSound(sound){
         // sound.setLoop( true );
         sound.setVolume( 1 );
         sound.play();
-        // console.log('music')
+        console.log('music')
     });
 }
 async function init() {
@@ -111,9 +111,9 @@ async function init() {
     listener = new THREE.AudioListener();
     camera.add( listener );
 
-    bgSound = new THREE.Audio( listener );
+    let sound = new THREE.Audio( listener );
 
-    loadBgSound(bgSound);
+    loadBgSound(sound);
     
     
 
@@ -371,7 +371,6 @@ function animate() {
             level += 1;
             if (scoreElement) scoreElement.innerText = level;
             if (level > 5) moveSpeed+=2;
-            sound.stop()
             init()
         }
     }
