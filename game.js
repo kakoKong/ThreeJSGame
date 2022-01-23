@@ -9,12 +9,11 @@ import { loadGLTF, loadAnimatedModel, loadBgSound, loadHitSound } from './loader
 let camera, scene, renderer, controls;
 let i;
 let box;
-let moveLeft = false;
-let moveRight = false;
+let moveLeft, moveRight = false;
 let canMove = true;
 let hit = false;
 let start = false;
-const obsPosition = [-200,  0, 200]
+const obsPosition = [-180,  0, 180]
 let obs = [];
 let moveSpeed = 10;
 let speed = 4;
@@ -22,7 +21,7 @@ let level = 1;
 let FP = false;
 let count = 0;
 let pause = false;
-let hitSound, sound, listener;
+let hitSound, listener;
 
 const scoreElement = document.getElementById("levell")
 
@@ -59,8 +58,22 @@ function addPlane(scene){
     scene.add(plane1);
 }
 
+function addSidePlane(scene){
+    var planeGeometry1 = new THREE.PlaneGeometry( 500, innerHeight, 20, 20);
+    var plane2 = new THREE.Mesh( planeGeometry1, new THREE.MeshPhongMaterial({
+        color: 'green'
+    }));
+    plane2.position.y = 10;
+    // plane2.postion.x = 100;
+    plane2.position.z = 100;
+    plane2.rotation.x = -Math.PI / 2;
+    // plane2.castShadow = true;
+    // plane2.receiveShadow = true;
+    scene.add(plane2);
+}
+
 function addBox(){
-    var boxGeometry = new THREE.BoxGeometry(40, 100, 40);
+    var boxGeometry = new THREE.BoxGeometry(50, 100, 40);
     var boxMaterial = new THREE.MeshLambertMaterial({color: 0x78b14b});
     var box = new THREE.Mesh(boxGeometry, boxMaterial);
     box.castShadow = true;
@@ -78,7 +91,7 @@ async function init() {
     listener = new THREE.AudioListener();
     camera.add( listener );
 
-    sound = new THREE.Audio( listener );
+    let sound = new THREE.Audio( listener );
     // loadBgSound(sound);
     
     //Create a Scene with fog
@@ -99,6 +112,7 @@ async function init() {
     
     //Add Plane
     addPlane(scene);
+    // addSidePlane(scene);
 
     //Add Player
     box = addBox();

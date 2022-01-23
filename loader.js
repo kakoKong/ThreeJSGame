@@ -11,7 +11,7 @@ async function loadGLTF(){
 
     const car = setupModel(carData);
 
-    car.scale.set(40, 50, 20)
+    car.scale.set(50, 55, 20)
 
     return car
 }
