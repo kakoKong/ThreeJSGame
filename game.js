@@ -79,7 +79,7 @@ async function init() {
     camera.add( listener );
 
     sound = new THREE.Audio( listener );
-    loadBgSound(sound);
+    // loadBgSound(sound);
     
     //Create a Scene with fog
     scene = new THREE.Scene();
