@@ -15,9 +15,7 @@ let hit = false;
 let start = false;
 const obsPosition = [-180,  0, 180]
 let obs = [];
-let moveSpeed = 10;
-let speed = 4;
-let level = 1;
+let moveSpeed, speed, level;
 let FP = false;
 let count = 0;
 let pause = false;
@@ -38,20 +36,81 @@ function deleteScore(){
     var img = health.getElementsByTagName('img');
     if (img.length > 1) img[0].remove();
     else{
+        img[0].remove()
         gameOver = true;
         document.getElementById('gameOver').style.display = 'block';
+        document.getElementById('welcome').style.display = 'none';
+        document.getElementById('start').style.display = 'none';
+        document.getElementById('restart').style.display = 'block';
         start = false;
     }
 }
 
-for (let i = 0; i < 3; i++){
-    setHealth();
-}
+async function restart(){
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('welcome').style.display = 'block';
+    document.getElementById('start').style.display = 'block';
+    document.getElementById('restart').style.display = 'none';
+    
+    gameOver = false;
 
+    await init();
+}
+function controlsFunction() {
+    const onKeyDown = function (event) {
+        switch ( event.code ) {
+            case 'ArrowRight':
+                moveRight = true;
+                break;
+            case 'ArrowLeft' :
+                moveLeft = true;
+                break;
+            case 'Space' :
+                start = true;
+                break; 
+            case 'KeyV':
+                FP = !FP;
+                break;
+            case 'KeyP':
+                pause = true;
+                
+        }
+    }
+
+    const onKeyUp = function (event) {
+        switch ( event.code ) {
+            case 'ArrowRight':
+                moveRight = false;
+                break;
+            case 'ArrowLeft':
+                moveLeft = false;    
+                break;        
+        }
+    }
+
+
+    document.addEventListener( 'keydown', onKeyDown );
+    document.addEventListener( 'keyup', onKeyUp);
+}
 var scoreElement = document.getElementById('level')
+controlsFunction();
 await init();
 animate();
 
+async function setUp(){
+    if (scoreElement) scoreElement.innerText = level;
+
+    console.log(box.children[5].rotation)
+    //Add Obstacals
+    for (i = 0; i < 4 * speed; i++){
+        const obstacal = await loadGLTF();
+        obstacal.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
+        obstacal.position.z = i * -200;
+        obstacal.position.y = 20;
+        obs.push(obstacal)
+        scene.add(obstacal);   
+    }
+}
 function setFirstPerson() {
     camera.position.set(box.position.x , 120, box.position.z)
 }
@@ -72,20 +131,6 @@ function addPlane(scene){
     plane1.castShadow = true;
     plane1.receiveShadow = true;
     scene.add(plane1);
-}
-
-function addSidePlane(scene){
-    var planeGeometry1 = new THREE.PlaneGeometry( 500, innerHeight, 20, 20);
-    var plane2 = new THREE.Mesh( planeGeometry1, new THREE.MeshPhongMaterial({
-        color: 'green'
-    }));
-    plane2.position.y = 10;
-    // plane2.postion.x = 100;
-    plane2.position.z = 100;
-    plane2.rotation.x = -Math.PI / 2;
-    // plane2.castShadow = true;
-    // plane2.receiveShadow = true;
-    scene.add(plane2);
 }
 
 function addBox(){
@@ -137,6 +182,14 @@ function addPlayer(){
 }
 
 async function init() {
+    obs = [];
+    moveSpeed = 10;
+    speed = 4;
+    level = 1;
+    
+    for (let i = 0; i < 3; i++){
+        setHealth();
+    }
     //Setup Camera
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
     setThridPerson();
@@ -168,64 +221,13 @@ async function init() {
     //Add Plane
     addPlane(scene);
     // addSidePlane(scene);
-    if (scoreElement) scoreElement.innerText = level;
-
+    
     //Add Player
     box = addPlayer();
     box.position.y = 30;
     box.position.x = 20;
     box.position.z = 600;
     scene.add(box);
-
-    console.log(box.children[5].rotation)
-    //Add Obstacals
-    for (i = 0; i < 4 * speed; i++){
-        const obstacal = await loadGLTF();
-        obstacal.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
-        obstacal.position.z = i * -200;
-        obstacal.position.y = 20;
-        obs.push(obstacal)
-        scene.add(obstacal);   
-    }
-
-    //Controls
-    const onKeyDown = function (event) {
-        switch ( event.code ) {
-            case 'ArrowRight':
-                moveRight = true;
-                break;
-            case 'ArrowLeft' :
-                moveLeft = true;
-                break;
-            case 'Space' :
-                start = true;
-                break; 
-            case 'KeyV':
-                FP = true;
-                break;
-            case 'KeyB':
-                FP = false;
-                break;
-            case 'KeyP':
-                pause = true;
-                
-        }
-    }
-
-    const onKeyUp = function (event) {
-        switch ( event.code ) {
-            case 'ArrowRight':
-                moveRight = false;
-                break;
-            case 'ArrowLeft':
-                moveLeft = false;    
-                break;        
-        }
-    }
-
-
-    document.addEventListener( 'keydown', onKeyDown );
-    document.addEventListener( 'keyup', onKeyUp);
 
     //Connect with HTML Canvas
     const canvas = document.getElementById( "gl-canvas" );
@@ -236,6 +238,7 @@ async function init() {
     
     document.body.appendChild(renderer.domElement);
 
+    setUp()
     //Update Controls
     createControls( camera );
     controls.update();
@@ -323,12 +326,16 @@ function animate() {
         box.rotation.y = 0;
     }
 
-     //View Changes
-     if (FP) {
+    //View Changes
+    if (FP) {
         setFirstPerson();
     }
     else if(FP == false){
         setThridPerson();
+    }
+
+    if (gameOver && start){
+        restart();
     }
 
     //When game start
@@ -349,6 +356,7 @@ function animate() {
         if (hit == true){
             collide();
             count ++
+            //Time for obstacal to fall back
             if (count == 40){
                 hit = false;
                 count = 0
@@ -361,17 +369,15 @@ function animate() {
         
         //When Passed a Level
         if (obs[obs.length - 1].position.z > 1000){
-            alert(`You Passed Level ${level}`)
             start = !start;
             speed += 2;
             obs = [];
             level += 1;
-
             
             if (level > 5) moveSpeed+=2;
 
             //restart
-            init()
+            setUp();
         }
     }
     else{
