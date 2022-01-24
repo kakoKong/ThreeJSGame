@@ -3,8 +3,7 @@ import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/example
 import { LightShadow } from 'https://cdn.skypack.dev/three@0.132.2/src/lights/LightShadow.js';
 
 import { loadGLTF, loadAnimatedModel, loadBgSound, loadHitSound } from './loader.js'
-
-// import { Vector3 } from 'three';
+import { addPlane, addPlayer } from './setup.js'
 
 let camera, scene, renderer, controls;
 let i;
@@ -21,165 +20,11 @@ let count = 0;
 let pause = false;
 let hitSound, listener;
 let gameOver = false;
+let scoreElement;
 
-
-function setHealth(){
-    var img = document.createElement("img");
-    img.src = "./assets/health.png";
-    var src = document.getElementById("Life");
-    // for (i = 0; i < 3; i++){
-    src.appendChild(img);
-}
-// }
-function deleteScore(){
-    var health = document.getElementById('Life');
-    var img = health.getElementsByTagName('img');
-    if (img.length > 1) img[0].remove();
-    else{
-        img[0].remove()
-        gameOver = true;
-        document.getElementById('gameOver').style.display = 'block';
-        document.getElementById('welcome').style.display = 'none';
-        document.getElementById('start').style.display = 'none';
-        document.getElementById('restart').style.display = 'block';
-        start = false;
-    }
-}
-
-async function restart(){
-    document.getElementById('gameOver').style.display = 'none';
-    document.getElementById('welcome').style.display = 'block';
-    document.getElementById('start').style.display = 'block';
-    document.getElementById('restart').style.display = 'none';
-    
-    gameOver = false;
-
-    await init();
-}
-function controlsFunction() {
-    const onKeyDown = function (event) {
-        switch ( event.code ) {
-            case 'ArrowRight':
-                moveRight = true;
-                break;
-            case 'ArrowLeft' :
-                moveLeft = true;
-                break;
-            case 'Space' :
-                start = true;
-                break; 
-            case 'KeyV':
-                FP = !FP;
-                break;
-            case 'KeyP':
-                pause = true;
-                
-        }
-    }
-
-    const onKeyUp = function (event) {
-        switch ( event.code ) {
-            case 'ArrowRight':
-                moveRight = false;
-                break;
-            case 'ArrowLeft':
-                moveLeft = false;    
-                break;        
-        }
-    }
-
-
-    document.addEventListener( 'keydown', onKeyDown );
-    document.addEventListener( 'keyup', onKeyUp);
-}
-var scoreElement = document.getElementById('level')
 controlsFunction();
 await init();
 animate();
-
-async function setUp(){
-    if (scoreElement) scoreElement.innerText = level;
-
-    console.log(box.children[5].rotation)
-    //Add Obstacals
-    for (i = 0; i < 4 * speed; i++){
-        const obstacal = await loadGLTF();
-        obstacal.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
-        obstacal.position.z = i * -200;
-        obstacal.position.y = 20;
-        obs.push(obstacal)
-        scene.add(obstacal);   
-    }
-}
-function setFirstPerson() {
-    camera.position.set(box.position.x , 120, box.position.z)
-}
-
-function setThridPerson() {
-    camera.position.set(0, 400, 1000);
-}
-
-function addPlane(scene){
-    const textureLoader = new THREE.TextureLoader();
-    const roadTexture = textureLoader.load('./assets/road.jpg')
-    var planeGeometry1 = new THREE.PlaneGeometry( 500, innerHeight, 10, 10);
-    var plane1 = new THREE.Mesh( planeGeometry1, new THREE.MeshPhongMaterial({
-        map: roadTexture
-    }));
-    plane1.position.y = 0;
-    plane1.rotation.x = -Math.PI / 2;
-    plane1.castShadow = true;
-    plane1.receiveShadow = true;
-    scene.add(plane1);
-}
-
-function addBox(){
-    var boxGeometry = new THREE.BoxGeometry(10, 40, 10);
-    var boxMaterial = new THREE.MeshLambertMaterial({color: 0xFFDABD});
-    var box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.castShadow = true;
-    box.receiveShadow = false;
-    return box
-}
-
-function addSphere(size, color){
-    const geometry = new THREE.SphereGeometry( size, size, size );
-    const material = new THREE.MeshLambertMaterial( { color } );
-    const sphere = new THREE.Mesh( geometry, material );
-    sphere.castShadow = true;
-    sphere.receiveShadow = false;
-    return sphere
-}
-
-function addPlayer(){
-    const group = new THREE.Group();
-    const body = addSphere(30, 0x282828);
-    const head = addSphere(12, 0xFFDABD);
-    const leg = addBox();
-    const leg2 = addBox();
-    const arm = addBox();
-    const arm2 = addBox();
-
-    head.position.set(0, 60, 0)
-    body.position.set(0, 20, 0);
-    leg.position.set(10, -20, 0);
-    leg2.position.set(-10, -20, 0);
-    arm.position.set(30, 30, 0);
-    arm2.position.set(-30, 30, 0)
-
-    arm.rotation.set(40, 0, 30)
-    arm2.rotation.set(40, 0, -30)
-
-
-    group.add(head);
-    group.add(body);
-    group.add(leg);
-    group.add(leg2);
-    group.add(arm);
-    group.add(arm2);
-
-    return group
-}
 
 async function init() {
     obs = [];
@@ -187,6 +32,7 @@ async function init() {
     speed = 4;
     level = 1;
     
+    scoreElement = document.getElementById('level')
     for (let i = 0; i < 3; i++){
         setHealth();
     }
@@ -198,9 +44,6 @@ async function init() {
     //Add Audio (Background Music)
     listener = new THREE.AudioListener();
     camera.add( listener );
-
-    let sound = new THREE.Audio( listener );
-    // loadBgSound(sound);
     
     //Create a Scene with fog
     scene = new THREE.Scene();
@@ -247,7 +90,98 @@ async function init() {
 
 }
 
+function setHealth(){
+    var img = document.createElement("img");
+    img.src = "./assets/health.png";
+    var src = document.getElementById("Life");
+    // for (i = 0; i < 3; i++){
+    src.appendChild(img);
+}
+// }
+function deleteScore(){
+    var health = document.getElementById('Life');
+    var img = health.getElementsByTagName('img');
+    if (img.length > 1) img[0].remove();
+    else{
+        img[0].remove()
+        gameOver = true;
+        document.getElementById('gameOver').style.display = 'block';
+        document.getElementById('welcome').style.display = 'none';
+        document.getElementById('start').style.display = 'none';
+        document.getElementById('restart').style.display = 'block';
+        start = false;
+    }
+}
 
+async function restart(){
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('welcome').style.display = 'block';
+    document.getElementById('start').style.display = 'block';
+    document.getElementById('restart').style.display = 'none';
+    
+    gameOver = false;
+
+    await init();
+}
+function controlsFunction() {
+    const onKeyDown = function (event) {
+        switch ( event.code ) {
+            case 'ArrowRight':
+                moveRight = true;
+                break;
+            case 'ArrowLeft' :
+                moveLeft = true;
+                break;
+            case 'Space' :
+                start = true;
+                canMove = true;
+                break; 
+            case 'KeyV':
+                FP = !FP;
+                break;
+            case 'KeyP':
+                pause = true;
+                
+        }
+    }
+
+    const onKeyUp = function (event) {
+        switch ( event.code ) {
+            case 'ArrowRight':
+                moveRight = false;
+                break;
+            case 'ArrowLeft':
+                moveLeft = false;    
+                break;        
+        }
+    }
+
+
+    document.addEventListener( 'keydown', onKeyDown );
+    document.addEventListener( 'keyup', onKeyUp);
+}
+
+async function setUp(){
+    if (scoreElement) scoreElement.innerText = level;
+
+    console.log(box.children[5].rotation)
+    //Add Obstacals
+    for (i = 0; i < 4 * speed; i++){
+        const obstacal = await loadGLTF();
+        obstacal.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
+        obstacal.position.z = i * -200;
+        obstacal.position.y = 20;
+        obs.push(obstacal)
+        scene.add(obstacal);   
+    }
+}
+function setFirstPerson() {
+    camera.position.set(box.position.x , 120, box.position.z)
+}
+
+function setThridPerson() {
+    camera.position.set(0, 400, 1000);
+}
 
 function createControls( camera ) {
     controls = new TrackballControls( camera, renderer.domElement );
@@ -347,6 +281,7 @@ function animate() {
         // console.log(box.children[5].rotation)
         if (pause){
             start = false;
+            canMove = false;
             pause = false;
         }
         if (obs.length != 1){
