@@ -73,12 +73,51 @@ function addSidePlane(scene){
 }
 
 function addBox(){
-    var boxGeometry = new THREE.BoxGeometry(50, 100, 40);
+    var boxGeometry = new THREE.BoxGeometry(10, 40, 10);
     var boxMaterial = new THREE.MeshLambertMaterial({color: 0x78b14b});
     var box = new THREE.Mesh(boxGeometry, boxMaterial);
     box.castShadow = true;
     box.receiveShadow = false;
     return box
+}
+
+function addSphere(size){
+    const geometry = new THREE.SphereGeometry( size, size, size );
+    const material = new THREE.MeshLambertMaterial( { color:0x78b14b } );
+    const sphere = new THREE.Mesh( geometry, material );
+    sphere.castShadow = true;
+    sphere.receiveShadow = false;
+    return sphere
+}
+
+function addPlayer(){
+    const group = new THREE.Group();
+    const body = addSphere(30);
+    const head = addSphere(12);
+    const leg = addBox();
+    const leg2 = addBox();
+    const arm = addBox();
+    const arm2 = addBox();
+
+    head.position.set(0, 60, 0)
+    body.position.set(0, 20, 0);
+    leg.position.set(10, -20, 0);
+    leg2.position.set(-10, -20, 0);
+    arm.position.set(30, 30, 0);
+    arm2.position.set(-30, 30, 0)
+
+    arm.rotation.set(40, 0, 30)
+    arm2.rotation.set(40, 0, -30)
+
+
+    group.add(head);
+    group.add(body);
+    group.add(leg);
+    group.add(leg2);
+    group.add(arm);
+    group.add(arm2);
+
+    return group
 }
 
 async function init() {
@@ -115,12 +154,13 @@ async function init() {
     // addSidePlane(scene);
 
     //Add Player
-    box = addBox();
+    box = addPlayer();
     box.position.y = 30;
     box.position.x = 20;
     box.position.z = 600;
     scene.add(box);
 
+    console.log(box.children[5].rotation)
     //Add Obstacals
     for (i = 0; i < 4 * speed; i++){
         const obstacal = await loadGLTF();
@@ -252,21 +292,28 @@ function animate() {
             box.position.x -= moveSpeed;
             canMove = true;
         }
+        box.rotation.y = -70;
     }
-    if (moveLeft && canMove == true) {
+    else if (moveLeft && canMove == true) {
         box.position.x -= moveSpeed;
         if (Math.abs(box.position.x) >= (250) - 20) {
             canMove = false;
             box.position.x += moveSpeed;
             canMove = true;
         }
+        box.rotation.y = 70;
+    }
+
+    else{
+        box.rotation.y = 0;
     }
 
     //When game start
     if (start) {
         //Check for Collision
         obs.forEach(collisionCheck)
-
+        // box.children[5].rotation.set(-box.children[5].rotation.x, 0, 30)
+        // console.log(box.children[5].rotation)
         if (pause){
             start = false;
             pause = false;
