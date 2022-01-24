@@ -22,9 +22,33 @@ let FP = false;
 let count = 0;
 let pause = false;
 let hitSound, listener;
+let gameOver = false;
 
-const scoreElement = document.getElementById("levell")
 
+function setHealth(){
+    var img = document.createElement("img");
+    img.src = "./assets/health.png";
+    var src = document.getElementById("Life");
+    // for (i = 0; i < 3; i++){
+    src.appendChild(img);
+}
+// }
+function deleteScore(){
+    var health = document.getElementById('Life');
+    var img = health.getElementsByTagName('img');
+    if (img.length > 1) img[0].remove();
+    else{
+        gameOver = true;
+        document.getElementById('gameOver').style.display = 'block';
+        start = false;
+    }
+}
+
+for (let i = 0; i < 3; i++){
+    setHealth();
+}
+
+var scoreElement = document.getElementById('level')
 await init();
 animate();
 
@@ -34,14 +58,6 @@ function setFirstPerson() {
 
 function setThridPerson() {
     camera.position.set(0, 400, 1000);
-}
-
-function addObstacal(height){
-    const obsGeometry = new THREE.BoxGeometry( 140, height, 40);
-    const obsMaterial = new THREE.MeshLambertMaterial( { color : 0xff0000 })
-    const obstacal = new THREE.Mesh( obsGeometry, obsMaterial);
-
-    return obstacal
 }
 
 function addPlane(scene){
@@ -74,16 +90,16 @@ function addSidePlane(scene){
 
 function addBox(){
     var boxGeometry = new THREE.BoxGeometry(10, 40, 10);
-    var boxMaterial = new THREE.MeshLambertMaterial({color: 0x78b14b});
+    var boxMaterial = new THREE.MeshLambertMaterial({color: 0xFFDABD});
     var box = new THREE.Mesh(boxGeometry, boxMaterial);
     box.castShadow = true;
     box.receiveShadow = false;
     return box
 }
 
-function addSphere(size){
+function addSphere(size, color){
     const geometry = new THREE.SphereGeometry( size, size, size );
-    const material = new THREE.MeshLambertMaterial( { color:0x78b14b } );
+    const material = new THREE.MeshLambertMaterial( { color } );
     const sphere = new THREE.Mesh( geometry, material );
     sphere.castShadow = true;
     sphere.receiveShadow = false;
@@ -92,8 +108,8 @@ function addSphere(size){
 
 function addPlayer(){
     const group = new THREE.Group();
-    const body = addSphere(30);
-    const head = addSphere(12);
+    const body = addSphere(30, 0x282828);
+    const head = addSphere(12, 0xFFDABD);
     const leg = addBox();
     const leg2 = addBox();
     const arm = addBox();
@@ -152,6 +168,7 @@ async function init() {
     //Add Plane
     addPlane(scene);
     // addSidePlane(scene);
+    if (scoreElement) scoreElement.innerText = level;
 
     //Add Player
     box = addPlayer();
@@ -180,12 +197,9 @@ async function init() {
             case 'ArrowLeft' :
                 moveLeft = true;
                 break;
-            case 'KeyT' :
+            case 'Space' :
                 start = true;
-                break;
-            case 'Space':
-                jump = true;
-                break;
+                break; 
             case 'KeyV':
                 FP = true;
                 break;
@@ -194,6 +208,7 @@ async function init() {
                 break;
             case 'KeyP':
                 pause = true;
+                
         }
     }
 
@@ -253,7 +268,7 @@ function collisionCheck(obstacal) {
             hit = true;
             //Add Hit Sound
             loadHitSound(hitSound)
-            
+            deleteScore();
         }
     }
 }
@@ -308,8 +323,17 @@ function animate() {
         box.rotation.y = 0;
     }
 
+     //View Changes
+     if (FP) {
+        setFirstPerson();
+    }
+    else if(FP == false){
+        setThridPerson();
+    }
+
     //When game start
     if (start) {
+        document.getElementById('blocker2').style.opacity = 0
         //Check for Collision
         obs.forEach(collisionCheck)
         // box.children[5].rotation.set(-box.children[5].rotation.x, 0, 30)
@@ -334,14 +358,6 @@ function animate() {
             //Continue moving Obejct
             obs.forEach(moveObs);
         }
-
-        //View Changes
-        if (FP) {
-            setFirstPerson();
-        }
-        else if(FP == false){
-            setThridPerson();
-        }
         
         //When Passed a Level
         if (obs[obs.length - 1].position.z > 1000){
@@ -351,14 +367,16 @@ function animate() {
             obs = [];
             level += 1;
 
-            if (scoreElement) scoreElement.innerText = level;
+            
             if (level > 5) moveSpeed+=2;
 
             //restart
             init()
         }
     }
-
+    else{
+        document.getElementById('blocker2').style.opacity = 1
+    }
     controls.update();
     renderer.render( scene, camera );
 

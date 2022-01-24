@@ -6,28 +6,37 @@
     <link rel='stylesheet' href='index.css'>
 </head>
 <body>
-    <!-- <div id="blocker">
+    <div id="blocker">
         <div id="stat">
             <div class="container">
-                <div id="level">
+                <div id="stats">
                     <h5>Level:  </h5>
-                    <h5 id='levell'>1</h5>
+                    <h5 id='level'></h5>
                 </div>
             </div>
             <div class="container">
                 <div id="Life">
-                    <p>3</p>    
                 </div>
             </div>
         </div>
+    </div>
+    <div id="blocker2">
+        
         <div id="instructions">
-            <h1>Hii</h1>
-            <button class="button">Start</button>
+            <div id="gameOver">
+                <h3>Game Over</h3>
+            </div>
+            <h3>Welcome to the Game</h3>
+            <p>Use Left-Right Arrow key to move around</p>
+            <p>Press P To Pause</p>
+            <p>Press V to Change to First-Person Point of View</p>
+            <p>Press B to Change to Third-Person Point of View</p>
+            <button class="button">Press 'Space' to Start</button>
         </div>
-
-    </div> -->
+    </div>
     <canvas id="gl-canvas" width="1024" height="1024"></canvas>
     <!-- <script src="./node_modules//cannon/build/cannon.min.js"></script> -->
     <script type="module" charset="UTF-8" src="game.js"></script>
+    <!-- <script src="game.js" defer></script> -->
 </body>
 </html>
