@@ -20,7 +20,8 @@ let count = 0;
 let pause = false;
 let hitSound, listener;
 let gameOver = false;
-let scoreElement;
+let scoreElement, scoreElement2;
+let levelPassed = false;
 
 controlsFunction();
 await init();
@@ -33,6 +34,8 @@ async function init() {
     level = 1;
     
     scoreElement = document.getElementById('level')
+    scoreElement2 = document.getElementById('level2')
+    // console.log(scoreElement)
     for (let i = 0; i < 3; i++){
         setHealth();
     }
@@ -104,6 +107,7 @@ function deleteScore(){
     if (img.length > 1) img[0].remove();
     else{
         img[0].remove()
+        levelPassed = false;
         gameOver = true;
         document.getElementById('gameOver').style.display = 'block';
         document.getElementById('welcome').style.display = 'none';
@@ -162,8 +166,14 @@ function controlsFunction() {
 }
 
 async function setUp(){
-    if (scoreElement) scoreElement.innerText = level;
-
+    if (scoreElement){
+        scoreElement.innerText = level;
+    }    
+    if (levelPassed == true){
+        document.getElementById('welcome').style.display = 'none';
+        document.getElementById('congrats').style.display = 'block';
+        scoreElement2.innerText = level - 1;
+    }
     console.log(box.children[5].rotation)
     //Add Obstacals
     for (i = 0; i < 4 * speed; i++){
@@ -185,10 +195,6 @@ function setThridPerson() {
 
 function createControls( camera ) {
     controls = new TrackballControls( camera, renderer.domElement );
-
-    controls.rotateSpeed = 2;
-    controls.zoomSpeed = 0.2;
-    controls.panSpeed = 0.8;
 
     controls.keys = [ 'KeyA', 'KeyS', 'KeyD' ];
 }
@@ -277,8 +283,7 @@ function animate() {
         document.getElementById('blocker2').style.opacity = 0
         //Check for Collision
         obs.forEach(collisionCheck)
-        // box.children[5].rotation.set(-box.children[5].rotation.x, 0, 30)
-        // console.log(box.children[5].rotation)
+        
         if (pause){
             start = false;
             canMove = false;
@@ -310,7 +315,7 @@ function animate() {
             level += 1;
             
             if (level > 5) moveSpeed+=2;
-
+            levelPassed = true;
             //restart
             setUp();
         }

@@ -73,6 +73,9 @@ img {
     background-color: rgba(0,0,0,0.5);
 }
 
+#level2 {
+    color: greenyellow;
+}
 #gameOver {
     margin: 0;
     /* border: 1px solid white; */
@@ -96,6 +99,10 @@ img {
     display: block
 }
 #restart {
+    display: none;
+}
+
+#congrats {
     display: none;
 }
 p{
