@@ -110,6 +110,7 @@ function deleteScore(){
         gameOver = true;
         document.getElementById('gameOver').style.display = 'block';
         document.getElementById('welcome').style.display = 'none';
+        document.getElementById('congrats').style.display = 'none';
         document.getElementById('start').style.display = 'none';
         document.getElementById('restart').style.display = 'block';
         start = false;
