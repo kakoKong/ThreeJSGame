@@ -58,7 +58,7 @@ img {
     align-items: center;
 
     text-align: center;
-    font-size: 5vw;
+    font-size: 4vw;
     cursor: pointer;
 }
 
@@ -106,7 +106,7 @@ img {
     display: none;
 }
 p{
-    font-size: 2vw;
+    font-size: 1.2vw;
     margin: 10px;
     color: white;
 }
