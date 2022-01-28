@@ -66,7 +66,6 @@ async function init() {
     
     //Add Plane
     addPlane(scene);
-    // addSidePlane(scene);
     
     //Add Player
     box = addPlayer();

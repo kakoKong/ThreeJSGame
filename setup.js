@@ -3,12 +3,13 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module
 function addPlane(scene){
     const textureLoader = new THREE.TextureLoader();
     const roadTexture = textureLoader.load('./assets/road.jpg')
-    var planeGeometry1 = new THREE.PlaneGeometry( 500, innerHeight, 10, 10);
+    var planeGeometry1 = new THREE.PlaneGeometry( 500, 2000, 10, 10);
     var plane1 = new THREE.Mesh( planeGeometry1, new THREE.MeshPhongMaterial({
         map: roadTexture
     }));
     plane1.position.y = 0;
     plane1.rotation.x = -Math.PI / 2;
+    plane1.position.z = 300;
     plane1.castShadow = true;
     plane1.receiveShadow = true;
     scene.add(plane1);

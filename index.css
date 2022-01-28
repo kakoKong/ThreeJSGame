@@ -13,20 +13,20 @@ body {
 #stat{
     width: 30%;
     height: 20%;
-    font-size: 160px;
+    font-size: 5vw;
     border: 1px solid white;
     /* display: flex; */
     /* flex-direction: row; */
     /* padding: 0; */
-    margin-left: 100px;
+    margin-left: 2rem;
     flex-wrap: wrap;
 }
 
 img {
     width: 1em;
-    margin-top: 70px;
+    margin-top: 2rem;
     
-    padding: 0 10px;
+    padding: 0 .5rem;
 }
 
 .container{
@@ -58,7 +58,7 @@ img {
     align-items: center;
 
     text-align: center;
-    font-size: 140px;
+    font-size: 5vw;
     cursor: pointer;
 }
 
@@ -91,7 +91,7 @@ img {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 80px;
+    font-size: 2vw;
     border-radius: 20px;
     margin-top: .5em;
   }
@@ -106,7 +106,7 @@ img {
     display: none;
 }
 p{
-    font-size: 60px;
+    font-size: 2vw;
     margin: 10px;
     color: white;
 }
