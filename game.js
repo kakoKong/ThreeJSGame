@@ -2,12 +2,12 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module
 import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js'
 import { LightShadow } from 'https://cdn.skypack.dev/three@0.132.2/src/lights/LightShadow.js';
 
-import { loadGLTF, loadAnimatedModel, loadBgSound, loadHitSound } from './loader.js'
+import { loadGLTF, loadHitSound } from './loader.js'
 import { addPlane, addPlayer } from './setup.js'
 
 let camera, scene, renderer, controls;
 let i;
-let box;
+let player;
 let moveLeft, moveRight = false;
 let canMove = true;
 let hit = false;
@@ -35,7 +35,7 @@ async function init() {
     
     scoreElement = document.getElementById('level')
     scoreElement2 = document.getElementById('level2')
-    // console.log(scoreElement)
+    
     for (let i = 0; i < 3; i++){
         setHealth();
     }
@@ -68,11 +68,11 @@ async function init() {
     addPlane(scene);
     
     //Add Player
-    box = addPlayer();
-    box.position.y = 30;
-    box.position.x = 20;
-    box.position.z = 600;
-    scene.add(box);
+    player = addPlayer();
+    player.position.y = 30;
+    player.position.x = 20;
+    player.position.z = 600;
+    scene.add(player);
 
     //Connect with HTML Canvas
     const canvas = document.getElementById( "gl-canvas" );
@@ -96,10 +96,9 @@ function setHealth(){
     var img = document.createElement("img");
     img.src = "./assets/health.png";
     var src = document.getElementById("Life");
-    // for (i = 0; i < 3; i++){
     src.appendChild(img);
 }
-// }
+
 function deleteScore(){
     var health = document.getElementById('Life');
     var img = health.getElementsByTagName('img');
@@ -174,7 +173,6 @@ async function setUp(){
         document.getElementById('congrats').style.display = 'block';
         scoreElement2.innerText = level - 1;
     }
-    console.log(box.children[5].rotation)
     //Add obstacles
     for (i = 0; i < 4 * speed; i++){
         const obstacle = await loadGLTF();
@@ -186,7 +184,7 @@ async function setUp(){
     }
 }
 function setFirstPerson() {
-    camera.position.set(box.position.x , 120, box.position.z)
+    camera.position.set(player.position.x , 120, player.position.z)
 }
 
 function setThridPerson() {
@@ -201,13 +199,13 @@ function createControls( camera ) {
 
 //Check for Collision
 function collisionCheck(obstacle) {
-    const box_x = box.position.x;
-    const box_z = box.position.z;
+    const player_x = player.position.x;
+    const player_z = player.position.z;
     const obs_x = obstacle.position.x;
     const obs_z = obstacle.position.z;
     hitSound = new THREE.Audio( listener );
-    if (box_z-20 < obs_z + 20 + speed && box_z-20 > obs_z + 20 - speed){
-        if(box_x-20 < obs_x + 70 + moveSpeed/2 && box_x+20 > obs_x - 70 - moveSpeed/2){
+    if (player_z-20 < obs_z + 20 + speed && player_z-20 > obs_z + 20 - speed){
+        if(player_x-20 < obs_x + 70 + moveSpeed/2 && player_x+20 > obs_x - 70 - moveSpeed/2){
             hit = true;
             //Add Hit Sound
             loadHitSound(hitSound)
@@ -244,26 +242,26 @@ function animate() {
     
     //Player Controls
     if (moveRight && canMove == true) {
-        box.position.x += moveSpeed;
-        if (Math.abs(box.position.x) >= (250) - 20) {
+        player.position.x += moveSpeed;
+        if (Math.abs(player.position.x) >= (250) - 20) {
             canMove = false;
-            box.position.x -= moveSpeed;
+            player.position.x -= moveSpeed;
             canMove = true;
         }
-        box.rotation.y = -70;
+        player.rotation.y = -70;
     }
     else if (moveLeft && canMove == true) {
-        box.position.x -= moveSpeed;
-        if (Math.abs(box.position.x) >= (250) - 20) {
+        player.position.x -= moveSpeed;
+        if (Math.abs(player.position.x) >= (250) - 20) {
             canMove = false;
-            box.position.x += moveSpeed;
+            player.position.x += moveSpeed;
             canMove = true;
         }
-        box.rotation.y = 70;
+        player.rotation.y = 70;
     }
 
     else{
-        box.rotation.y = 0;
+        player.rotation.y = 0;
     }
 
     //View Changes

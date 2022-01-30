@@ -16,31 +16,7 @@ async function loadGLTF(){
     return car
 }
 
-async function loadAnimatedModel(){
-    const loader = new FBXLoader();
-    const player = await loader.loadAsync('./assets/player.fbx')
-    player.scale.set(2, 2, 2)
-    player.position.set(30, 20, 600)
-    const anim = new FBXLoader();
-    const animation = await anim.loadAsync('./assets/running.fbx');
 
-    const mixer = new THREE.AnimationMixer(player);
-    console.log(mixer)
-    const idle = mixer.clipAction(animation.animations[0]);
-    idle.play();
-
-    scene.add(player);
-
-}
-async function loadBgSound(sound){
-    const audioLoader = new THREE.AudioLoader();
-    audioLoader.load( './assets/bg.mp3', function( buffer ) {
-        sound.setBuffer( buffer );
-        sound.setLoop( true );
-        sound.setVolume( 0.5 );
-        sound.play();
-    });
-}
 async function loadHitSound(sound){
     const audioLoader2 = new THREE.AudioLoader();
     audioLoader2.load( './assets/hit.mp3', function( buffer ) {
@@ -51,4 +27,4 @@ async function loadHitSound(sound){
     });
 }
 
-export {loadGLTF, loadAnimatedModel, loadBgSound, loadHitSound}
+export {loadGLTF, loadHitSound}
