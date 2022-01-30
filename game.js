@@ -175,14 +175,14 @@ async function setUp(){
         scoreElement2.innerText = level - 1;
     }
     console.log(box.children[5].rotation)
-    //Add Obstacals
+    //Add obstacles
     for (i = 0; i < 4 * speed; i++){
-        const obstacal = await loadGLTF();
-        obstacal.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
-        obstacal.position.z = i * -200;
-        obstacal.position.y = 20;
-        obs.push(obstacal)
-        scene.add(obstacal);   
+        const obstacle = await loadGLTF();
+        obstacle.position.x = obsPosition[Math.floor(Math.random()*obsPosition.length)]
+        obstacle.position.z = i * -200;
+        obstacle.position.y = 20;
+        obs.push(obstacle)
+        scene.add(obstacle);   
     }
 }
 function setFirstPerson() {
@@ -200,11 +200,11 @@ function createControls( camera ) {
 }
 
 //Check for Collision
-function collisionCheck(obstacal) {
+function collisionCheck(obstacle) {
     const box_x = box.position.x;
     const box_z = box.position.z;
-    const obs_x = obstacal.position.x;
-    const obs_z = obstacal.position.z;
+    const obs_x = obstacle.position.x;
+    const obs_z = obstacle.position.z;
     hitSound = new THREE.Audio( listener );
     if (box_z-20 < obs_z + 20 + speed && box_z-20 > obs_z + 20 - speed){
         if(box_x-20 < obs_x + 70 + moveSpeed/2 && box_x+20 > obs_x - 70 - moveSpeed/2){
@@ -216,24 +216,24 @@ function collisionCheck(obstacal) {
     }
 }
 
-//When Player Hit Obstacal
+//When Player Hit Obstacle
 function collide(){
     obs.forEach(moveBackObs)
 }
 
-//Move Obstacal toward Player
-function moveObs(obstacals) {
-    obstacals.position.z += speed;
+//Move Obstacle toward Player
+function moveObs(obstacles) {
+    obstacles.position.z += speed;
 }
 
-//Move Obstacal back when player got hit
-function moveBackObs(obstacals){
-    obstacals.position.z -= speed;
+//Move obstacle back when player got hit
+function moveBackObs(obstacles){
+    obstacles.position.z -= speed;
 }
 
-//Delete Obstacal when passed player
-function deleteObs(obstacals){
-    if (obstacals.position.z > 900){
+//Delete obstacle when passed player
+function deleteObs(obstacles){
+    if (obstacles.position.z > 900){
         obs.shift()
     }
 }
@@ -296,7 +296,7 @@ function animate() {
         if (hit == true){
             collide();
             count ++
-            //Time for obstacal to fall back
+            //Time for obstacle to fall back
             if (count == 40){
                 hit = false;
                 count = 0
